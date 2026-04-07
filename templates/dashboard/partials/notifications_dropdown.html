@@ -1,0 +1,53 @@
+{% if notifications %}
+<div class="divide-y divide-gray-100 dark:divide-gray-700">
+    {% for notification in notifications %}
+    <div class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+         id="notification-{{ notification.pk }}">
+        <!-- Type-colored dot -->
+        <div class="flex-shrink-0 mt-1.5">
+            <span class="block w-2.5 h-2.5 rounded-full
+                {% if notification.notification_type == 'info' %}bg-blue-500
+                {% elif notification.notification_type == 'success' %}bg-emerald-500
+                {% elif notification.notification_type == 'warning' %}bg-amber-500
+                {% elif notification.notification_type == 'error' %}bg-red-500
+                {% else %}bg-gray-400
+                {% endif %}"></span>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0">
+            <p class="text-sm text-gray-900 dark:text-gray-100 leading-snug">{{ notification.message }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ notification.created_at|timesince }} ago</p>
+        </div>
+
+        <!-- Mark as read button -->
+        <button hx-post="{% url 'dashboard:mark_notification_read' notification.pk %}"
+                hx-target="#notification-{{ notification.pk }}"
+                hx-swap="outerHTML"
+                class="flex-shrink-0 p-1 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-all"
+                title="Mark as read">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Mark all read -->
+<div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+    <button hx-post="{% url 'dashboard:mark_all_notifications_read' %}"
+            hx-target="#notifications-content"
+            hx-swap="innerHTML"
+            class="w-full text-center text-sm font-medium accent-text hover:underline">
+        Mark all as read
+    </button>
+</div>
+{% else %}
+<div class="px-4 py-8 text-center">
+    <svg class="w-8 h-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+    </svg>
+    <p class="text-sm text-gray-500 dark:text-gray-400">No new notifications</p>
+</div>
+{% endif %}

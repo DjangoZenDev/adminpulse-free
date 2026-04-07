@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AdminPulse{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Welcome back, {{ user.get_full_name|default:user.username }}. Here is your manager overview.</p>
+    </div>
+
+    <!-- KPI Cards (read-only, no customize) -->
+    <div id="kpi-container"
+         hx-get="{% url 'dashboard:kpi_cards' %}"
+         hx-trigger="load, every 60s"
+         hx-swap="innerHTML">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse hidden sm:block">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse hidden lg:block">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Chart (full width) -->
+    <div class="col-span-12">
+        {% include "dashboard/partials/chart_revenue.html" %}
+    </div>
+
+    <!-- Activity Feed (full width) -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+            <button hx-get="{% url 'dashboard:activity_feed' %}" hx-target="#manager-activity-feed" hx-swap="innerHTML"
+                    class="text-sm accent-text hover:underline">Refresh</button>
+        </div>
+        <div id="manager-activity-feed"
+             hx-get="{% url 'dashboard:activity_feed' %}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <div class="px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">Loading activity...</div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

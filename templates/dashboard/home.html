@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AdminPulse{% endblock %}
+
+{% block content %}
+<div x-data="{
+    customizeMode: false,
+    layoutData: {{ layout|safe }},
+    saving: false,
+    saveLayout() {
+        this.saving = true;
+        fetch('{% url "dashboard:save_layout" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(this.layoutData)
+        }).then(() => {
+            this.saving = false;
+            this.customizeMode = false;
+        });
+    },
+    resetLayout() {
+        fetch('{% url "dashboard:reset_layout" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        }).then(() => {
+            window.location.reload();
+        });
+    },
+    toggleWidget(index) {
+        this.layoutData[index].visible = !this.layoutData[index].visible;
+    },
+    setWidth(index, width) {
+        this.layoutData[index].width = width;
+    },
+    getWidthClass(width) {
+        const map = {
+            'full': 'col-span-12',
+            '2/3': 'col-span-12 lg:col-span-8',
+            '1/2': 'col-span-12 lg:col-span-6',
+            '1/3': 'col-span-12 lg:col-span-4'
+        };
+        return map[width] || 'col-span-12';
+    },
+    initSortable() {
+        const el = this.$refs.widgetGrid;
+        if (el && typeof Sortable !== 'undefined') {
+            Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'opacity-30',
+                onEnd: (evt) => {
+                    const item = this.layoutData.splice(evt.oldIndex, 1)[0];
+                    this.layoutData.splice(evt.newIndex, 0, item);
+                    this.layoutData.forEach((w, i) => w.position = i);
+                }
+            });
+        }
+    }
+}" x-init="$nextTick(() => { if (customizeMode) initSortable(); })" x-effect="if (customizeMode) $nextTick(() => initSortable())">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Welcome back, {{ user.get_full_name|default:user.username }}. Here is your overview.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="htmx.trigger('#kpi-container', 'refresh');"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Widget Grid -->
+    <div class="grid grid-cols-12 gap-6" x-ref="widgetGrid">
+        <template x-for="(widget, index) in layoutData" :key="widget.widget + '-' + index">
+            <div :class="[getWidthClass(widget.width), !widget.visible && !customizeMode ? 'hidden' : '']">
+
+                <!-- Customize toolbar -->
+                <div x-show="customizeMode" x-cloak class="mb-1 flex items-center justify-between px-1">
+                    <div class="flex items-center gap-2">
+                        <span class="drag-handle cursor-grab active:cursor-grabbing p-1.5 bg-gray-200 dark:bg-gray-600 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                            </svg>
+                        </span>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" x-text="widget.widget.replace('_', ' ')"></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select @change="setWidth(index, $event.target.value)" :value="widget.width"
+                                class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                            <option value="full">Full Width</option>
+                            <option value="2/3">2/3 Width</option>
+                            <option value="1/2">1/2 Width</option>
+                            <option value="1/3">1/3 Width</option>
+                        </select>
+                        <button @click="toggleWidget(index)"
+                                :class="widget.visible ? 'text-green-600 bg-green-50 dark:bg-green-900/30' : 'text-gray-400 bg-gray-100 dark:bg-gray-700'"
+                                class="p-1.5 rounded transition-colors">
+                            <svg x-show="widget.visible" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <svg x-show="!widget.visible" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Widget content -->
+                <div :class="[customizeMode && !widget.visible ? 'opacity-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl' : '', customizeMode ? 'ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl' : '']">
+                    <!-- KPI Cards -->
+                    <template x-if="widget.widget === 'kpi_cards'">
+                        <div x-show="widget.visible || customizeMode">
+                            <div id="kpi-container"
+                                 hx-get="{% url 'dashboard:kpi_cards' %}"
+                                 hx-trigger="load, refresh"
+                                 hx-swap="innerHTML">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                                    </div>
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                                    </div>
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse hidden sm:block">
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                                    </div>
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse hidden lg:block">
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3"></div>
+                                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Revenue Chart (Pro) -->
+                    <template x-if="widget.widget === 'chart_revenue'">
+                        <div x-show="widget.visible || customizeMode">
+                            {% include "dashboard/partials/upgrade_card.html" with title="Interactive Charts" description="Revenue trend charts, activity summaries, and metric comparisons. Available in AdminPulse Pro." %}
+                        </div>
+                    </template>
+
+                    <!-- Activity Chart (Pro) -->
+                    <template x-if="widget.widget === 'chart_activity'">
+                        <div x-show="widget.visible || customizeMode">
+                            {% include "dashboard/partials/upgrade_card.html" with title="Activity Charts" description="Detailed activity visualizations and trend analysis. Available in AdminPulse Pro." %}
+                        </div>
+                    </template>
+
+                    <!-- Activity Feed -->
+                    <template x-if="widget.widget === 'activity_feed'">
+                        <div x-show="widget.visible || customizeMode">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+                                    <button hx-get="{% url 'dashboard:activity_feed' %}" hx-target="#activity-feed-content" hx-swap="innerHTML"
+                                            class="text-sm accent-text hover:underline">Refresh</button>
+                                </div>
+                                <div id="activity-feed-content"
+                                     hx-get="{% url 'dashboard:activity_feed' %}"
+                                     hx-trigger="load"
+                                     hx-swap="innerHTML">
+                                    <div class="px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">Loading activity...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Quick Actions -->
+                    <template x-if="widget.widget === 'quick_actions'">
+                        <div x-show="widget.visible || customizeMode">
+                            {% include "dashboard/partials/quick_actions.html" %}
+                        </div>
+                    </template>
+
+                    <!-- Notifications Widget -->
+                    <template x-if="widget.widget === 'notifications_feed'">
+                        <div x-show="widget.visible || customizeMode">
+                            {% include "dashboard/partials/notifications_widget.html" %}
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+{% endblock %}

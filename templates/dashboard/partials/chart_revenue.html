@@ -1,0 +1,123 @@
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+     x-data="{
+         chart: null,
+         loading: true,
+         init() {
+             this.fetchData();
+         },
+         fetchData() {
+             this.loading = true;
+             fetch('{% url "dashboard:chart_revenue_trend" %}')
+                 .then(r => r.json())
+                 .then(data => {
+                     this.loading = false;
+                     this.$nextTick(() => this.renderChart(data));
+                 })
+                 .catch(() => { this.loading = false; });
+         },
+         renderChart(data) {
+             const canvas = this.$refs.revenueCanvas;
+             if (!canvas || typeof Chart === 'undefined') return;
+
+             if (this.chart) { this.chart.destroy(); }
+
+             const ctx = canvas.getContext('2d');
+             const isDark = document.documentElement.classList.contains('dark');
+             const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#6366f1';
+
+             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.parentElement.clientHeight);
+             gradient.addColorStop(0, accentColor + '30');
+             gradient.addColorStop(1, accentColor + '05');
+
+             this.chart = new Chart(ctx, {
+                 type: 'line',
+                 data: {
+                     labels: data.labels,
+                     datasets: [{
+                         label: 'Revenue',
+                         data: data.values,
+                         borderColor: accentColor,
+                         backgroundColor: gradient,
+                         borderWidth: 2.5,
+                         fill: true,
+                         tension: 0.4,
+                         pointRadius: 0,
+                         pointHoverRadius: 5,
+                         pointHoverBackgroundColor: accentColor,
+                         pointHoverBorderColor: '#fff',
+                         pointHoverBorderWidth: 2
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     interaction: {
+                         intersect: false,
+                         mode: 'index'
+                     },
+                     plugins: {
+                         legend: { display: false },
+                         tooltip: {
+                             backgroundColor: isDark ? '#374151' : '#fff',
+                             titleColor: isDark ? '#f3f4f6' : '#111827',
+                             bodyColor: isDark ? '#d1d5db' : '#6b7280',
+                             borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                             borderWidth: 1,
+                             padding: 12,
+                             displayColors: false,
+                             callbacks: {
+                                 label: function(ctx) {
+                                     return '$' + ctx.parsed.y.toLocaleString();
+                                 }
+                             }
+                         }
+                     },
+                     scales: {
+                         x: {
+                             grid: { color: isDark ? '#374151' : '#f3f4f6' },
+                             ticks: {
+                                 color: isDark ? '#9ca3af' : '#6b7280',
+                                 maxTicksLimit: 8,
+                                 font: { size: 11 }
+                             },
+                             border: { display: false }
+                         },
+                         y: {
+                             grid: { color: isDark ? '#374151' : '#f3f4f6' },
+                             ticks: {
+                                 color: isDark ? '#9ca3af' : '#6b7280',
+                                 font: { size: 11 },
+                                 callback: function(value) {
+                                     return '$' + value.toLocaleString();
+                                 }
+                             },
+                             border: { display: false }
+                         }
+                     }
+                 }
+             });
+         }
+     }">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Revenue Trend</h2>
+        <button @click="fetchData()" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Loading state -->
+    <div x-show="loading" class="flex items-center justify-center h-64">
+        <svg class="w-8 h-8 animate-spin accent-text" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+
+    <!-- Chart -->
+    <div x-show="!loading" x-cloak class="h-64">
+        <canvas x-ref="revenueCanvas"></canvas>
+    </div>
+</div>

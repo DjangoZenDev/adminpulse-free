@@ -1,0 +1,161 @@
+{% if query %}
+<div class="py-2">
+
+    <!-- Category Tabs -->
+    <div class="flex items-center gap-1 px-3 pb-2 border-b border-gray-100 dark:border-gray-700">
+        <button hx-get="{% url 'dashboard:search' %}?q={{ query }}&category=all"
+                hx-target="#search-results"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                       {% if category == 'all' %}accent-bg text-white{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            All
+            {% if counts.total > 0 %}
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs {% if category == 'all' %}bg-white/20{% else %}bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300{% endif %}">{{ counts.total }}</span>
+            {% endif %}
+        </button>
+        <button hx-get="{% url 'dashboard:search' %}?q={{ query }}&category=users"
+                hx-target="#search-results"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                       {% if category == 'users' %}accent-bg text-white{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            Users
+            {% if counts.users > 0 %}
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs {% if category == 'users' %}bg-white/20{% else %}bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300{% endif %}">{{ counts.users }}</span>
+            {% endif %}
+        </button>
+        <button hx-get="{% url 'dashboard:search' %}?q={{ query }}&category=activities"
+                hx-target="#search-results"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                       {% if category == 'activities' %}accent-bg text-white{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            Activities
+            {% if counts.activities > 0 %}
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs {% if category == 'activities' %}bg-white/20{% else %}bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300{% endif %}">{{ counts.activities }}</span>
+            {% endif %}
+        </button>
+        <button hx-get="{% url 'dashboard:search' %}?q={{ query }}&category=metrics"
+                hx-target="#search-results"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                       {% if category == 'metrics' %}accent-bg text-white{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            Metrics
+            {% if counts.metrics > 0 %}
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs {% if category == 'metrics' %}bg-white/20{% else %}bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300{% endif %}">{{ counts.metrics }}</span>
+            {% endif %}
+        </button>
+    </div>
+
+    <!-- Results -->
+    <div class="max-h-72 overflow-y-auto">
+
+        <!-- Users -->
+        {% if results.users %}
+        {% if category == 'all' %}
+        <div class="px-4 py-1.5 mt-1">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Users</span>
+        </div>
+        {% endif %}
+        {% for user in results.users %}
+        <a href="/admin/auth/user/{{ user.pk }}/change/" class="flex items-center px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ user.get_full_name|default:user.username }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+            </div>
+        </a>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Activities -->
+        {% if results.activities %}
+        {% if category == 'all' %}
+        <div class="px-4 py-1.5 {% if results.users %}border-t border-gray-100 dark:border-gray-700 mt-1 pt-2{% endif %}">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Activities</span>
+        </div>
+        {% endif %}
+        {% for activity in results.activities %}
+        <div class="flex items-center px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mr-3">
+                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ activity.action }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ activity.target }} &mdash; {{ activity.timestamp|timesince }} ago</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Metrics -->
+        {% if results.metrics %}
+        {% if category == 'all' %}
+        <div class="px-4 py-1.5 {% if results.users or results.activities %}border-t border-gray-100 dark:border-gray-700 mt-1 pt-2{% endif %}">
+            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Metrics</span>
+        </div>
+        {% endif %}
+        {% for metric in results.metrics %}
+        <div class="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <div class="flex items-center min-w-0">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <span class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ metric.name }}</span>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0 ml-3">
+                {% if metric.unit == 'currency' %}${{ metric.value|floatformat:0 }}
+                {% elif metric.unit == 'percent' %}{{ metric.value|floatformat:1 }}%
+                {% else %}{{ metric.value|floatformat:0 }}
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Empty state per category -->
+        {% if not results.users and not results.activities and not results.metrics %}
+        <div class="px-4 py-6 text-center">
+            <svg class="w-8 h-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <p class="text-sm text-gray-500 dark:text-gray-400">No results found for "{{ query }}"{% if category != 'all' %} in {{ category }}{% endif %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination (for filtered category views) -->
+    {% if category != 'all' %}
+    {% with paginated=results.users|default:results.activities|default:results.metrics %}
+    {% if paginated.has_other_pages %}
+    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-100 dark:border-gray-700">
+        {% if paginated.has_previous %}
+        <button hx-get="{% url 'dashboard:search' %}?q={{ query }}&category={{ category }}&page={{ paginated.previous_page_number }}"
+                hx-target="#search-results"
+                class="px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Previous
+        </button>
+        {% else %}
+        <span></span>
+        {% endif %}
+
+        <span class="text-xs text-gray-400 dark:text-gray-500">Page {{ paginated.number }} of {{ paginated.paginator.num_pages }}</span>
+
+        {% if paginated.has_next %}
+        <button hx-get="{% url 'dashboard:search' %}?q={{ query }}&category={{ category }}&page={{ paginated.next_page_number }}"
+                hx-target="#search-results"
+                class="px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Next
+        </button>
+        {% else %}
+        <span></span>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
+
+</div>
+{% endif %}

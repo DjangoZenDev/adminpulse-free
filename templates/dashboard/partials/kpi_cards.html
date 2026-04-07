@@ -1,0 +1,149 @@
+{% load humanize %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% for metric in metrics %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 relative overflow-hidden group transition-all duration-300"
+         id="kpi-card-{{ metric.pk }}"
+         x-data="{ refreshing: false }">
+
+        <!-- Accent border top -->
+        <div class="absolute top-0 left-0 right-0 h-1 accent-bg"></div>
+
+        <!-- Per-card refresh button -->
+        <button @click="refreshing = true; htmx.ajax('GET', '{% url 'dashboard:kpi_cards' %}', { target: '#kpi-card-{{ metric.pk }}', swap: 'outerHTML' }).then(() => { refreshing = false; })"
+                class="absolute top-3 right-3 p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                :class="refreshing ? 'animate-spin opacity-100' : ''">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+        </button>
+
+        <!-- Loading skeleton overlay -->
+        <div x-show="refreshing" x-cloak class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-20 rounded-xl">
+            <div class="flex flex-col items-center gap-2">
+                <svg class="w-6 h-6 animate-spin accent-text" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ metric.name }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 transition-all duration-500">
+                    {% if metric.unit == 'currency' %}${{ metric.value|floatformat:0 }}
+                    {% elif metric.unit == 'percent' %}{{ metric.value|floatformat:1 }}%
+                    {% else %}{{ metric.value|floatformat:0 }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="w-12 h-12 rounded-lg flex items-center justify-center accent-bg-light accent-text">
+                {% if metric.icon == 'users' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                </svg>
+                {% elif metric.icon == 'dollar-sign' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {% elif metric.icon == 'shopping-cart' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
+                </svg>
+                {% elif metric.icon == 'trending-up' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                {% else %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Trend Indicator -->
+        <div class="mt-3 flex items-center text-sm">
+            {% if metric.trend == 'up' %}
+            <span class="flex items-center text-emerald-600 dark:text-emerald-400">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                </svg>
+                {{ metric.change_percent }}%
+            </span>
+            <span class="text-gray-500 dark:text-gray-400 ml-2">vs previous</span>
+            {% elif metric.trend == 'down' %}
+            <span class="flex items-center text-red-600 dark:text-red-400">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+                {{ metric.change_percent }}%
+            </span>
+            <span class="text-gray-500 dark:text-gray-400 ml-2">vs previous</span>
+            {% else %}
+            <span class="flex items-center text-gray-500 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+                No change
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Mini Sparkline -->
+        <div class="mt-3 h-10">
+            <canvas id="sparkline-{{ metric.pk }}" class="w-full h-full"></canvas>
+        </div>
+        <script>
+        (function() {
+            var historyData = {{ metric.history_data|default:"[]"|safe }};
+            var canvas = document.getElementById('sparkline-{{ metric.pk }}');
+            if (canvas && typeof Chart !== 'undefined' && historyData.length > 0) {
+                var ctx = canvas.getContext('2d');
+                var isDark = document.documentElement.classList.contains('dark');
+                var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#6366f1';
+
+                var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, accentColor + '40');
+                gradient.addColorStop(1, accentColor + '05');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: historyData.map(function(_, i) { return i; }),
+                        datasets: [{
+                            data: historyData,
+                            borderColor: accentColor,
+                            backgroundColor: gradient,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        },
+                        animation: { duration: 800 }
+                    }
+                });
+            }
+        })();
+        </script>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+        <svg class="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        <p>No metrics available.</p>
+        <p class="text-sm mt-1">Run <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-sm">python manage.py seed_data</code> to generate sample data.</p>
+    </div>
+    {% endfor %}
+</div>

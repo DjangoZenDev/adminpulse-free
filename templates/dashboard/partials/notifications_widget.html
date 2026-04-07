@@ -1,0 +1,49 @@
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+     x-data="{ notifications: [], loading: true }"
+     x-init="
+         fetch('{% url 'dashboard:notifications_dropdown' %}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+             .then(r => r.text())
+             .then(html => {
+                 loading = false;
+                 $refs.notifContent.innerHTML = html;
+             })
+             .catch(() => { loading = false; })
+     ">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h2>
+        {% if unread_notification_count > 0 %}
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium accent-bg text-white">
+            {{ unread_notification_count }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Loading state -->
+    <div x-show="loading" class="p-6 space-y-4">
+        <div class="flex items-start gap-3 animate-pulse">
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700 mt-1.5"></div>
+            <div class="flex-1">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+            </div>
+        </div>
+        <div class="flex items-start gap-3 animate-pulse">
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700 mt-1.5"></div>
+            <div class="flex-1">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+            </div>
+        </div>
+        <div class="flex items-start gap-3 animate-pulse">
+            <div class="w-2.5 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700 mt-1.5"></div>
+            <div class="flex-1">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6 mb-2"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification content loaded via fetch -->
+    <div x-ref="notifContent" x-show="!loading" x-cloak class="max-h-80 overflow-y-auto"></div>
+</div>

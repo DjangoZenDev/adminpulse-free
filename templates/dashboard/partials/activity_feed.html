@@ -1,0 +1,35 @@
+<div class="divide-y divide-gray-100 dark:divide-gray-700">
+    {% for activity in activities %}
+    <div class="flex items-center px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+        <div class="flex-shrink-0">
+            <img
+                src="https://ui-avatars.com/api/?name={{ activity.user.get_full_name|default:activity.user.username }}&background=6366f1&color=fff&size=36"
+                alt="{{ activity.user.username }}"
+                class="w-9 h-9 rounded-full"
+            >
+        </div>
+        <div class="ml-4 flex-1 min-w-0">
+            <p class="text-sm text-gray-900 dark:text-gray-100">
+                <span class="font-medium">{{ activity.user.get_full_name|default:activity.user.username }}</span>
+                <span class="text-gray-500 dark:text-gray-400">{{ activity.action }}</span>
+            </p>
+            {% if activity.target %}
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ activity.target }}</p>
+            {% endif %}
+        </div>
+        <div class="flex-shrink-0 ml-4">
+            <time class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap" datetime="{{ activity.timestamp|date:'c' }}">
+                {{ activity.timestamp|timesince }} ago
+            </time>
+        </div>
+    </div>
+    {% empty %}
+    <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+        <svg class="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p>No activity recorded yet.</p>
+        <p class="text-sm mt-1">Run <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">python manage.py seed_data</code></p>
+    </div>
+    {% endfor %}
+</div>

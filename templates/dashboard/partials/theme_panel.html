@@ -1,0 +1,129 @@
+<!-- Theme Customizer Panel (slide-out from right) -->
+<div x-show="themePanelOpen" x-cloak class="fixed inset-0 z-50">
+    <!-- Backdrop -->
+    <div x-show="themePanelOpen"
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="themePanelOpen = false"
+         class="absolute inset-0 bg-black/30"></div>
+
+    <!-- Panel -->
+    <div x-show="themePanelOpen"
+         x-transition:enter="transition ease-in-out duration-300 transform"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in-out duration-300 transform"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="absolute right-0 inset-y-0 w-80 bg-white dark:bg-gray-800 shadow-2xl flex flex-col">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Theme Customizer</h2>
+            <button @click="themePanelOpen = false" class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <form method="post" action="{% url 'dashboard:update_theme' %}" class="flex-1 overflow-y-auto p-6 space-y-8">
+            {% csrf_token %}
+
+            <!-- Sidebar Color -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Sidebar Color</h3>
+                <div class="flex items-center gap-3">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="sidebar_color" value="slate-900" class="sr-only peer" {% if sidebar_color == 'slate-900' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#0f172a] ring-2 ring-transparent peer-checked:ring-blue-500 ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Slate"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="sidebar_color" value="gray-900" class="sr-only peer" {% if sidebar_color == 'gray-900' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#111827] ring-2 ring-transparent peer-checked:ring-blue-500 ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Gray"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="sidebar_color" value="zinc-900" class="sr-only peer" {% if sidebar_color == 'zinc-900' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#18181b] ring-2 ring-transparent peer-checked:ring-blue-500 ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Zinc"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="sidebar_color" value="blue-900" class="sr-only peer" {% if sidebar_color == 'blue-900' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#1e3a5f] ring-2 ring-transparent peer-checked:ring-blue-500 ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Blue"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="sidebar_color" value="indigo-900" class="sr-only peer" {% if sidebar_color == 'indigo-900' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#312e81] ring-2 ring-transparent peer-checked:ring-blue-500 ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Indigo"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Accent Color -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Accent Color</h3>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accent_color" value="indigo" class="sr-only peer" {% if accent_color == 'indigo' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#6366f1] ring-2 ring-transparent peer-checked:ring-gray-900 dark:peer-checked:ring-white ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Indigo"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accent_color" value="blue" class="sr-only peer" {% if accent_color == 'blue' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#3b82f6] ring-2 ring-transparent peer-checked:ring-gray-900 dark:peer-checked:ring-white ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Blue"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accent_color" value="emerald" class="sr-only peer" {% if accent_color == 'emerald' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#10b981] ring-2 ring-transparent peer-checked:ring-gray-900 dark:peer-checked:ring-white ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Emerald"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accent_color" value="amber" class="sr-only peer" {% if accent_color == 'amber' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#f59e0b] ring-2 ring-transparent peer-checked:ring-gray-900 dark:peer-checked:ring-white ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Amber"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accent_color" value="rose" class="sr-only peer" {% if accent_color == 'rose' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#f43f5e] ring-2 ring-transparent peer-checked:ring-gray-900 dark:peer-checked:ring-white ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Rose"></span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accent_color" value="violet" class="sr-only peer" {% if accent_color == 'violet' %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full bg-[#8b5cf6] ring-2 ring-transparent peer-checked:ring-gray-900 dark:peer-checked:ring-white ring-offset-2 dark:ring-offset-gray-800 transition-all" title="Violet"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Compact Mode -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Layout</h3>
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Compact Mode</span>
+                    <div class="relative">
+                        <input type="checkbox" name="compact_mode" value="on" class="sr-only peer" {% if compact_mode %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Dark Mode -->
+            <div>
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Dark Mode</span>
+                    <div class="relative" @click.prevent="darkMode = !darkMode">
+                        <input type="checkbox" class="sr-only peer" :checked="darkMode">
+                        <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Apply Button -->
+            <div class="pt-4">
+                <button type="submit" class="w-full py-2.5 accent-bg text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+                    Apply Theme
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

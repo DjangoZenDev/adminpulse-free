@@ -1,0 +1,64 @@
+
+<!-- Widget Wrapper Pattern
+     Used in customize mode to wrap each widget with drag/visibility/width controls.
+     This file documents the pattern; actual rendering happens inline in home.html via Alpine.js.
+
+     Usage context (inside an x-for loop over layoutData):
+
+     <div :class="getWidthClass(widget.width)">
+         - Customize toolbar (shown only in customizeMode)
+         - Widget content
+     </div>
+-->
+
+<!-- Example standalone usage for reference -->
+<div class="relative" x-data="{ editMode: false, visible: true, width: 'full' }">
+
+    <!-- Edit mode toolbar -->
+    <div x-show="editMode" x-cloak class="mb-1 flex items-center justify-between px-1">
+        <!-- Left: drag handle + title -->
+        <div class="flex items-center gap-2">
+            <span class="drag-handle cursor-grab active:cursor-grabbing p-1.5 bg-gray-200 dark:bg-gray-600 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                </svg>
+            </span>
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Widget Title</span>
+        </div>
+
+        <!-- Right: width selector + visibility toggle -->
+        <div class="flex items-center gap-2">
+            <select @change="width = $event.target.value" :value="width"
+                    class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <option value="full">Full Width</option>
+                <option value="2/3">2/3 Width</option>
+                <option value="1/2">1/2 Width</option>
+                <option value="1/3">1/3 Width</option>
+            </select>
+            <button @click="visible = !visible"
+                    :class="visible ? 'text-green-600 bg-green-50 dark:bg-green-900/30' : 'text-gray-400 bg-gray-100 dark:bg-gray-700'"
+                    class="p-1.5 rounded transition-colors">
+                <!-- Eye open icon (visible) -->
+                <svg x-show="visible" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <!-- Eye off icon (hidden) -->
+                <svg x-show="!visible" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Widget content area -->
+    <div :class="[
+            editMode && !visible ? 'opacity-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl' : '',
+            editMode ? 'ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl' : ''
+         ]">
+        <!-- Widget content goes here -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Widget content placeholder</p>
+        </div>
+    </div>
+</div>
