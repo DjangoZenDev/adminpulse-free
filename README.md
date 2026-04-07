@@ -20,7 +20,7 @@ This is the **free version** of AdminPulse. It includes core functionality to he
 - One-click CSV export (users, activities)
 - Role-based dashboards (admin, manager, analyst, viewer)
 
-**Upgrade to AdminPulse Pro:** https://djangozen.com
+**Upgrade to AdminPulse Pro:** https://djangozen.com/product/adminpulse-pro/
 
 ## Quick Start
 
@@ -50,5 +50,5 @@ python manage.py runserver
 5. Login: **admin** / **admin**
 
 ---
-*Free version by DjangoZen. Upgrade to Pro at https://djangozen.com*
+*Free version by DjangoZen. Upgrade to Pro at https://djangozen.com/product/adminpulse-pro/*
 *Copyright 2026 DjangoZen. All Rights Reserved.*
