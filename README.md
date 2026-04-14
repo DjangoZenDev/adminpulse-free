@@ -1,5 +1,7 @@
 # AdminPulse Free
 
+![adminpulse-free](docs/screenshots/hero.png)
+
 **Modern Django Admin Dashboard — Free Edition**
 *By DjangoZen - https://djangozen.com*
 
